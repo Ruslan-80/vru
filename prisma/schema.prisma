@@ -1,0 +1,188 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "mysql"
+    url       = env("MYSQL_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+model User {
+    id               Int               @id @default(autoincrement())
+    fullName         String
+    email            String            @unique
+    password         String
+    role             UserRole          @default(USER)
+    verified         DateTime          @default(now())
+    provider         String?
+    providerId       String?
+    cart             Cart?
+    orders           Order[]
+    verificationCode VerificationCode?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Cart {
+    id          Int        @id @default(autoincrement())
+    token       String
+    totalAmount Int        @default(0)
+    user        User?      @relation(fields: [userId], references: [id])
+    userId      Int?       @unique
+    items       CartItem[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+    id            Int              @id @default(autoincrement())
+    productItem   ProductVariation @relation(fields: [productItemId], references: [id])
+    productItemId Int
+    quantity      Int
+    cart          Cart             @relation(fields: [cartId], references: [id])
+    cartId        Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Order {
+    id          Int         @id @default(autoincrement())
+    token       String
+    totalAmount Int
+    status      OrderStatus
+    paymentId   String?
+    items       Json
+    fullName    String
+    address     String
+    email       String
+    phone       String
+    comment     String?
+    user        User?       @relation(fields: [userId], references: [id])
+    userId      Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model VerificationCode {
+    id        Int      @id @default(autoincrement())
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int      @unique
+    code      String
+    expiresAt DateTime @default(now())
+
+    @@unique([userId, code])
+}
+
+enum OrderStatus {
+    PENDING
+    SUCCEEDED
+    CANCELLED
+}
+
+enum UserRole {
+    USER
+    ADMIN
+}
+
+model Category {
+    id          Int        @id @default(autoincrement())
+    parentId    Int?
+    name        String
+    slug        String     @unique
+    description String?
+    children    Category[] @relation("CategoryToParent")
+    parent      Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+    products    Product[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Product {
+    id                Int                @id @default(autoincrement())
+    categoryId        Int
+    article           String             @unique
+    name              String
+    slug              String             @unique
+    description       String?
+    basePrice         Decimal            @db.Decimal(10, 2)
+    manufacturingTime String
+    stock             Int
+    visibility        Boolean            @default(true)
+    category          Category           @relation(fields: [categoryId], references: [id])
+    variations        ProductVariation[]
+    attributes        ProductAttribute[]
+    mediaFiles        MediaFile[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model ProductVariation {
+    id             Int     @id @default(autoincrement())
+    productId      Int
+    sku            String  @unique
+    variationValue String
+    price          Decimal @db.Decimal(10, 2)
+    stock          Int
+    isDefault      Boolean @default(false)
+
+    product  Product    @relation(fields: [productId], references: [id])
+    cartItem CartItem[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Attribute {
+    id       Int                @id @default(autoincrement())
+    name     String
+    slug     String             @unique
+    values   AttributeValue[]
+    products ProductAttribute[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model AttributeValue {
+    id          Int     @id @default(autoincrement())
+    attributeId Int
+    valueString String?
+    valueNumber Float?
+
+    attribute        Attribute          @relation(fields: [attributeId], references: [id])
+    productAttribute ProductAttribute[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model ProductAttribute {
+    id               Int            @id @default(autoincrement())
+    productId        Int
+    attributeId      Int
+    attributeValueId Int
+    product          Product        @relation(fields: [productId], references: [id])
+    attribute        Attribute      @relation(fields: [attributeId], references: [id])
+    attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MediaFile {
+    id        Int     @id @default(autoincrement())
+    productId Int
+    fileType  String
+    fileUrl   String
+    product   Product @relation(fields: [productId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
