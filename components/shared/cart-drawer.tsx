@@ -19,7 +19,6 @@ interface Props {
 
 export const CartDrawer: React.FC<React.PropsWithChildren<Props>> = ({
     children,
-    className,
 }) => {
     return (
         <Sheet>

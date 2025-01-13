@@ -6,6 +6,7 @@ import { ProductCard } from "./product-card";
 import { useCategoryStore } from "@/store/category";
 
 interface Props {
+    key: number;
     title: string;
     items: any[];
     categoryId: number;
@@ -34,14 +35,19 @@ export const ProductsGroupList: React.FC<Props> = ({
     return (
         <div className={className} id={title} ref={IntersectionRef}>
             <h2 className="font-extrabold mb-5">{title}</h2>
-            <div className={cn("grid grid-cols-3 gap-[50px]", ListClassName)}>
+            <div className={cn("grid grid-cols-3 gap-[15px]", ListClassName)}>
                 {items.map(product => (
                     <ProductCard
                         key={product.id}
                         id={product.id}
                         name={product.name}
-                        basePrice={product.items[0].price}
-                        imageUrl={product.imageUrl}
+                        basePrice={product.basePrice}
+                        imageUrl="../../images/vru1.png"
+                        slug={product.slug}
+                        article={product.article}
+                        description={product.description}
+                        manufacturingTime={product.manufacturingTime}
+                        stock={product.stock}
                     />
                 ))}
             </div>

@@ -4,10 +4,10 @@ import slugify from "slugify";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
-        const categories = await prisma.category.findMany();
-        return NextResponse.json(categories, { status: 200 });
+        const category = await prisma.category.findMany();
+        return NextResponse.json({ category }, { status: 200 });
     } catch (error) {
         console.error(error);
         return NextResponse.json(

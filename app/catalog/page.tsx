@@ -7,10 +7,16 @@ export default async function CatalogPage() {
 
     return (
         <Container>
+            <h1 className="font-semibold mt-10">Категории</h1>
             {categories.map(category => (
-                <Link key={category.name} href={`/catalog/${category.slug}`}>
-                    <div>{category.name}</div>
-                </Link>
+                <div key={category.id} className="flex flex-col mt-10">
+                    <Link
+                        key={category.name}
+                        href={`/catalog/${category.slug}`}
+                    >
+                        <div>{category.name}</div>
+                    </Link>
+                </div>
             ))}
         </Container>
     );

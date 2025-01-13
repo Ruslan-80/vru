@@ -1,24 +1,32 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCategoryStore } from "@/store/category";
+import axios from "axios";
+import { Category } from "@prisma/client";
 
 interface Props {
     className?: string;
 }
 
-const cats = [
-    { id: 1, name: "ВРУ-1" },
-    { id: 2, name: "ВРУ-3" },
-    { id: 3, name: "Закуски" },
-    { id: 4, name: "Коктейли" },
-    { id: 5, name: "Кофе" },
-    { id: 6, name: "Напитки" },
-    { id: 7, name: "Десерты" },
-];
-
 export const Categoryes: React.FC<Props> = ({ className }) => {
     const categoryActiveId = useCategoryStore(state => state.activeId);
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get("/api/catalog");
+            const { category } = response.data;
+            setCategories(category);
+        } catch (error) {
+            console.error("Ошибка при получении категорий:", error);
+        }
+    };
+
     return (
         <div
             className={cn(
@@ -26,7 +34,7 @@ export const Categoryes: React.FC<Props> = ({ className }) => {
                 className
             )}
         >
-            {cats.map(({ name, id }, index) => (
+            {categories.map(({ name, id }, index) => (
                 <a
                     className={cn(
                         "flex items-center font-bold h-11 rounded-2xl px-5",
@@ -39,15 +47,6 @@ export const Categoryes: React.FC<Props> = ({ className }) => {
                     <button>{name}</button>
                 </a>
             ))}
-            <a
-                className={cn(
-                    "flex items-center font-bold h-11 rounded-2xl px-5"
-                )}
-                href={`/catalog`}
-                key={cats.length}
-            >
-                <button>Catalog</button>
-            </a>
         </div>
     );
 };

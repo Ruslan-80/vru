@@ -1,7 +1,7 @@
 import Link from "next/link";
-import React from "react";
-import { Button } from "../ui";
-import { Plus } from "lucide-react";
+import { Heart, BarChart2, ShoppingCart } from "lucide-react";
+import { Button, Badge } from "../ui";
+import { Card, CardContent, CardFooter } from "../ui/card";
 
 interface Props {
     id: number;
@@ -12,6 +12,10 @@ interface Props {
     manufacturingTime: string;
     basePrice: any;
     stock: number;
+    attributes: {
+        name: string;
+        value: number | string;
+    }[];
     imageUrl: string;
     className?: string;
 }
@@ -25,68 +29,101 @@ export const ProductCardOne: React.FC<Props> = ({
     manufacturingTime,
     stock,
     basePrice,
+    attributes,
     imageUrl,
-    className,
 }) => {
     return (
-        <div key={id} className={className}>
-            <h1 className="mb-3 mt-3 text-3xl  font-bold">{name}</h1>
-            <Link href={`/product/${slug}`}>
-                <div className="flex justify-between p-3 bg-secondary rounded-lg h-[500px]">
-                    <div className="w-[40%]">
-                        <img
-                            className="w-[500px] h-[450px]"
-                            src={imageUrl}
-                            alt={name}
-                        />
-                    </div>
-                    <div className="flex flex-col w-[55%] ">
-                        <div className="flex justify-between">
-                            <button>Отложить</button>
-                            <button>Сравнить</button>
-
-                            <p className="text-sm mt-3 text-gray-600">
-                                Артикул: {article}
-                            </p>
-                            <div className="text-sm mt-3 text-gray-600 text-center">
-                                Сделано в России
+        <Card className="w-full max-w-[1280px] overflow-hidden transition-all duration-300 hover:shadow-lg">
+            <Link href={`/catalog/product/${slug}`} className="group">
+                <CardContent className="p-0" key={id}>
+                    <div className="flex flex-col md:flex-row">
+                        <div className="relative w-full md:w-2/5 h-[300px] md:h-[550px]">
+                            <img
+                                src={imageUrl}
+                                alt={name}
+                                className="object-cover transition-transform duration-300 group-hover:scale-105 w-full h-full"
+                            />
+                            <Badge className="absolute top-4 left-4 bg-green-500">
+                                Новинка
+                            </Badge>
+                        </div>
+                        <div className="w-full md:w-3/5 p-6 flex flex-col justify-between">
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl font-bold tracking-tight max-w-[500px]">
+                                        {name}
+                                    </h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        артикул: {article}
+                                    </p>
+                                </div>
+                                <p className="text-muted-foreground mb-6">
+                                    {description}
+                                </p>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    {attributes.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex flex-col"
+                                        >
+                                            <span className="text-sm font-medium">
+                                                {item.name}
+                                            </span>
+                                            <span className="text-sm text-muted-foreground">
+                                                {item.value}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className="text-3xl font-bold">
+                                        {Number(basePrice).toLocaleString(
+                                            "en-US",
+                                            {
+                                                style: "currency",
+                                                currency: "RUB",
+                                            }
+                                        )}
+                                    </span>
+                                    {stock > 0 ? (
+                                        <Badge
+                                            variant="outline"
+                                            className="bg-green-100 text-green-800"
+                                        >
+                                            На складе: {stock}
+                                        </Badge>
+                                    ) : (
+                                        <Badge
+                                            variant="outline"
+                                            className="bg-red-100 text-red-800"
+                                        >
+                                            Out of Stock
+                                        </Badge>
+                                    )}
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    Срок изготовления: {manufacturingTime}
+                                </p>
                             </div>
                         </div>
-                        <hr className="mt-5" />
-
-                        <div className="flex justify-between items-center mt-4">
-                            <span className="text-[36px]">
-                                от{" "}
-                                <b>
-                                    {" "}
-                                    {Number(basePrice).toLocaleString(
-                                        "ru-RU"
-                                    )}{" "}
-                                    ₽
-                                </b>
-                            </span>
-                        </div>
-                        <p className="text-lg mt-3 text-gray-600">
-                            {description}
-                        </p>
-                        {stock > 3 && (
-                            <p className="text-lg mt-3 text-gray-600">
-                                В наличии {stock} шт.
-                            </p>
-                        )}
-                        <p className="text-lg mt-3 text-gray-600">
-                            Срок изготовления:{manufacturingTime}
-                        </p>
-
-                        <Button
-                            variant="destructive"
-                            className="text-base font-bold mt-6"
-                        >
-                            <Plus size={20} className="mr-1" /> Добавить
+                    </div>
+                </CardContent>
+                <CardFooter className="flex justify-between items-center bg-muted p-6">
+                    <div className="flex space-x-4">
+                        <Button variant="outline" size="icon">
+                            <Heart className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon">
+                            <BarChart2 className="h-4 w-4" />
                         </Button>
                     </div>
-                </div>
+                    <Button className="w-1/2">
+                        <ShoppingCart className="mr-2 h-4 w-4" /> В корзину
+                    </Button>
+                </CardFooter>
             </Link>
-        </div>
+        </Card>
     );
 };

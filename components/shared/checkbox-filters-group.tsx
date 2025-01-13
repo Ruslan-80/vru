@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { Input } from "../ui";
 import { FilterCheckbox } from "@/components/shared";

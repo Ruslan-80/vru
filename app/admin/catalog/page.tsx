@@ -2,6 +2,7 @@
 import { Container } from "@/components/shared";
 import { Button } from "@/components/ui";
 import axios from "axios";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface Category {
@@ -28,7 +29,7 @@ export default function CategoriesAdmin() {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get("/api/catalog");
+            const response = await axios.get("/api/admin/catalog");
             // Извлекаем поле category из ответа
             const { category } = response.data;
 
@@ -111,12 +112,12 @@ export default function CategoriesAdmin() {
     return (
         <Container className="container">
             <div className="flex gap-5 pb-10 pt-5 font-bold">
-                <a href="/admin/catalog">Категории</a>
-                <a href="/admin/products">Товары</a>
-                <a href="/admin/attributes">Характеристики</a>
-                <a href="/admin/images">Картинки</a>
-                <a href="/admin/users">Пользователи</a>
-                <a href="/admin/cart">Корзины</a>
+                <Link href="/admin/catalog">Категории</Link>
+                <Link href="/admin/products">Товары</Link>
+                <Link href="/admin/attributes">Характеристики</Link>
+                <Link href="/admin/images">Картинки</Link>
+                <Link href="/admin/users">Пользователи</Link>
+                <Link href="/admin/cart">Корзины</Link>
 
                 <div className="ml-auto">
                     <Button onClick={() => setIsFormVisible(!isFormVisible)}>

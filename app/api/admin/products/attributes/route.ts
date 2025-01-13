@@ -31,6 +31,18 @@ type ProductData = {
     }[];
 };
 
+export async function GET() {
+    const attributes = await prisma.product.findUnique({
+        where: {
+            id: 1,
+        },
+        select: {
+            attributes: true,
+        },
+    });
+    return NextResponse.json({ attributes }, { status: 200 });
+}
+
 export async function POST(req: NextRequest) {
     const productData: ProductData = await req.json();
     for (const attribute of productData.attributes) {

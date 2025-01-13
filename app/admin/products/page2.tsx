@@ -1,8 +1,8 @@
 "use client";
 import { Container } from "@/components/shared";
-import { MyNav } from "@/components/shared/my-nav";
 import { Button } from "@/components/ui";
 import axios from "axios";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface Product {
@@ -16,19 +16,25 @@ interface Product {
     manufacturingTime: string;
     stock: number;
     visibility: boolean;
-    attributes: ProductAttributes[];
+    attributes: ProductAttribute[];
 }
-interface ProductAttributes {
-    name: string;
-    value: string;
+
+interface ProductAttribute {
+    id: number;
+    attributeName: string;
+    attributeValue: string;
 }
+
 interface Category {
     id: number;
     name: string;
+    slug: string;
 }
+
 export default function ProductsAdmin() {
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [attributes, setAttributes] = useState<Attribute[]>([]);
     const [name, setName] = useState("");
     const [categoryId, setCategoryId] = useState<number | null>(null);
     const [article, setArticle] = useState("");
@@ -54,7 +60,14 @@ export default function ProductsAdmin() {
         try {
             const response = await axios.get("/api/admin/products");
             const { products } = response.data;
-            setProducts(products);
+            if (Array.isArray(products)) {
+                setProducts(products);
+            } else {
+                console.error(
+                    "Ожидался массив товаров, но получен другой формат:",
+                    response.data
+                );
+            }
         } catch (error) {
             console.error("Ошибка при получении товаров:", error);
         }
@@ -62,9 +75,18 @@ export default function ProductsAdmin() {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get("/api/catalog");
+            const response = await axios.get("/api/admin/catalog");
+            // Извлекаем поле category из ответа
             const { category } = response.data;
-            setCategories(category);
+
+            if (Array.isArray(category)) {
+                setCategories(category);
+            } else {
+                console.error(
+                    "Ожидался массив категорий, но получен другой формат:",
+                    response.data
+                );
+            }
         } catch (error) {
             console.error("Ошибка при получении категорий:", error);
         }
@@ -151,25 +173,26 @@ export default function ProductsAdmin() {
         setManufacturingTime(product.manufacturingTime);
         setStock(product.stock);
         setVisibility(product.visibility);
-        setProductAttributes(
-            product.attributes.map(attribute => ({
-                name: attribute.name,
-                value: attribute.value,
-            }))
-        );
+        setProductAttributes(productAttributes);
         setProductId(product.id);
         setIsEditing(true);
         setIsFormVisible(true);
     };
-    console.log(productAttributes);
 
     return (
         <Container className="container">
-            <MyNav />
-            <div className="flex justify-end mb-3">
-                <Button onClick={() => setIsFormVisible(!isFormVisible)}>
-                    {isFormVisible ? "Скрыть форму" : "Добавить товар"}
-                </Button>
+            <div className="flex gap-5 pb-10 pt-5 font-bold ">
+                <Link href="/admin/catalog">Категории</Link>
+                <Link href="/admin/products">Товары</Link>
+                <Link href="/admin/attributes">Характеристики</Link>
+                <Link href="/admin/images">Картинки</Link>
+                <Link href="/admin/users">Пользователи</Link>
+                <Link href="/admin/cart">Корзины</Link>
+                <div className="ml-auto">
+                    <Button onClick={() => setIsFormVisible(!isFormVisible)}>
+                        {isFormVisible ? "Скрыть форму" : "Добавить товар"}
+                    </Button>
+                </div>
             </div>
             <hr />
             {isFormVisible && (
@@ -239,51 +262,35 @@ export default function ProductsAdmin() {
                     </label>
                     <div>
                         <h3>Характеристики товара</h3>
-
-                        {productAttributes.map((attribute, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center gap-2"
-                            >
+                        {productAttributes.map((attr, index) => (
+                            <div key={index}>
                                 <input
                                     type="text"
-                                    value={attribute.name}
+                                    value={attr.name}
                                     onChange={e =>
-                                        setProductAttributes(
-                                            productAttributes.map((attr, i) =>
-                                                i === index
-                                                    ? {
-                                                          ...attr,
-                                                          name: e.target.value,
-                                                      }
-                                                    : attr
-                                            )
+                                        updateAttribute(
+                                            index,
+                                            "name",
+                                            e.target.value
                                         )
                                     }
-                                    placeholder="Название характеристики"
+                                    placeholder="Характеристики товара"
                                 />
                                 <input
                                     type="text"
-                                    value={attribute.value}
+                                    value={attr.value}
                                     onChange={e =>
-                                        setProductAttributes(
-                                            productAttributes.map((attr, i) =>
-                                                i === index
-                                                    ? {
-                                                          ...attr,
-                                                          value: e.target.value,
-                                                      }
-                                                    : attr
-                                            )
+                                        updateAttribute(
+                                            index,
+                                            "value",
+                                            e.target.value
                                         )
                                     }
                                     placeholder="Значение характеристики"
                                 />
                             </div>
                         ))}
-                        <Button
-                        // onClick={setAttributes}
-                        >
+                        <Button onClick={addAttributeField}>
                             Добавить характеристику
                         </Button>
                     </div>
@@ -297,62 +304,59 @@ export default function ProductsAdmin() {
                 </div>
             )}
             <ul className="mt-4 mb-4">
-                {products &&
-                    products.map(product => (
-                        <div
-                            key={product.id}
-                            className="mb-4 text-sm text-gray-600"
-                        >
-                            <li className="flex justify-between mb-2">
-                                <div
-                                    key={product.id}
-                                    className="mr-5 min-w-[25rem]"
+                {products.map(product => (
+                    <div
+                        key={product.id}
+                        className="mb-4 text-sm text-gray-600"
+                    >
+                        <li className="flex justify-between mb-2">
+                            <div
+                                key={product.id}
+                                className="mr-5 min-w-[25rem]"
+                            >
+                                <div>{product.name}</div>
+
+                                {product.attributes.map(attr => (
+                                    <div key={attr.id} className="flex  mt-2">
+                                        <span className="mr-2">
+                                            {attr.attributeName}
+                                        </span>
+                                        <span className="text-red-600">
+                                            {attr.attributeValue}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mr-4 min-w-[10rem]">
+                                {product.article}
+                            </div>
+                            <div className="mr-4  min-w-[3rem]">
+                                (ID: {product.id})
+                            </div>
+                            <div className="mr-4 min-w-[7rem]">
+                                {product.slug}
+                            </div>
+                            <div className="mr-4">{product.description}</div>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant={"outline"}
+                                    onClick={() => handleEditClick(product)}
                                 >
-                                    <div>{product.name}</div>
-
-                                    {product.attributes.map((attr, index) => (
-                                        <div key={index} className="flex  mt-2">
-                                            <span className="mr-2">
-                                                {attr.name}
-                                            </span>
-                                            <span className="text-red-600">
-                                                {attr.value}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="mr-4 min-w-[10rem]">
-                                    {product.article}
-                                </div>
-                                <div className="mr-4  min-w-[3rem]">
-                                    (ID: {product.id})
-                                </div>
-                                <div className="mr-4 min-w-[7rem]">
-                                    {product.slug}
-                                </div>
-                                <div className="mr-4">
-                                    {product.description}
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant={"outline"}
-                                        onClick={() => handleEditClick(product)}
-                                    >
-                                        Редактировать
-                                    </Button>
-                                    <Button
-                                        onClick={() =>
-                                            handleDeleteProduct(product.slug)
-                                        }
-                                    >
-                                        Удалить
-                                    </Button>
-                                </div>
-                            </li>
-                            <hr />
-                        </div>
-                    ))}
+                                    Редактировать
+                                </Button>
+                                <Button
+                                    onClick={() =>
+                                        handleDeleteProduct(product.slug)
+                                    }
+                                >
+                                    Удалить
+                                </Button>
+                            </div>
+                        </li>
+                        <hr />
+                    </div>
+                ))}
             </ul>
         </Container>
     );

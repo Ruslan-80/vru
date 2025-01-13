@@ -11,6 +11,7 @@ import {
     SearchInput,
 } from "@/components/shared";
 import { useSession } from "next-auth/react";
+import BreadcrumbLogic from "./breadcrumb";
 
 interface Props {
     className?: string;

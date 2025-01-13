@@ -29,14 +29,14 @@ export const ProductCard: React.FC<Props> = ({
 }) => {
     return (
         <div key={id} className={className}>
-            <Link href={`/product/${slug}`}>
-                <div className="flex flex-col justify-center p-6 bg-secondary rounded-lg h-[350px]">
+            <Link href={`/catalog/product/${slug}`}>
+                <div className="flex flex-col justify-center p-6 bg-secondary rounded-lg h-[450px]">
                     <img
                         className="w-[215px] h-[150px]"
                         src={imageUrl}
                         alt={name}
                     />
-                    <h2 className="mb-1 mt-3 font-bold">{name}</h2>
+                    <h2 className="mb-3 mt-5 font-bold">{name}</h2>
                     <p className="text-sm text-gray-400">{description}</p>
                     <p className="text-sm text-gray-400">
                         В наличии {stock} шт.

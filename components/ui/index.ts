@@ -6,3 +6,5 @@ export { Input } from "./input";
 export { Select } from "./select";
 export { Slider } from "./slider";
 export { Skeleton } from "./skeleton";
+export { Badge } from "./badge";
+export { Card } from "./card";
