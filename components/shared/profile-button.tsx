@@ -1,7 +1,6 @@
-import { signIn, useSession } from "next-auth/react";
 import React from "react";
 import { Button } from "../ui";
-import { CircleUser, User } from "lucide-react";
+import { CircleUser } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -9,33 +8,15 @@ interface Props {
     className?: string;
 }
 
-export const ProfileButton: React.FC<Props> = ({
-    className,
-    onClickSignIn,
-}) => {
-    const { data: session } = useSession();
+export const ProfileButton: React.FC<Props> = ({ className }) => {
     return (
         <div className={className}>
-            {!session ? (
-                <Button
-                    onClick={onClickSignIn}
-                    variant="outline"
-                    className="flex items-center gap-1"
-                >
-                    <User size={16} />
-                    Войти
+            <Link href="/profile">
+                <Button variant="secondary" className="flex items-center gap-2">
+                    <CircleUser size={18} />
+                    Профиль
                 </Button>
-            ) : (
-                <Link href="/profile">
-                    <Button
-                        variant="secondary"
-                        className="flex items-center gap-2"
-                    >
-                        <CircleUser size={18} />
-                        Профиль
-                    </Button>
-                </Link>
-            )}
+            </Link>
         </div>
     );
 };

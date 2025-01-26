@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+// import { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import { Header } from "@/components/shared/header";
 import "./globals.css";
 import { Providers } from "@/components/shared/providers";
 
 import BreadcrumbLogic from "@/components/shared/breadcrumb";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Create Next App",

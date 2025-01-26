@@ -2,10 +2,10 @@ import { Api } from "@/services/api-client";
 import { Attribute } from "@prisma/client";
 import React from "react";
 
-type AttribyteItem = Pick<Attribute, "id" | "name">;
+type AttributeItem = Pick<Attribute, "id" | "name">;
 
 interface ReturnProps {
-    attributes: AttribyteItem[];
+    attributes: AttributeItem[];
 }
 export const useFilterAttributes = (): ReturnProps => {
     const [attributes, setAttributes] = React.useState<

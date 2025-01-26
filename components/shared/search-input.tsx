@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Api } from "@/services/api-client";
 import { Product } from "@prisma/client";
 import { Search } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { useClickAway, useDebounce } from "react-use";
@@ -41,6 +42,8 @@ export const SearchInput: React.FC<Props> = ({ className }) => {
         setProducts([]);
     };
 
+    const image = "/images/vru.jpg";
+
     return (
         <>
             {focused && (
@@ -65,8 +68,8 @@ export const SearchInput: React.FC<Props> = ({ className }) => {
                 {products.length > 0 && (
                     <div
                         className={cn(
-                            "absolute w-full bg-white rounded-xl py-2 top-14 shadow-md transition-all duration-200 invisible opasity-0 z-30",
-                            focused && "visible opasity-100 top-12"
+                            "absolute w-full bg-white rounded-xl py-2 top-14 shadow-md transition-all duration-200 invisible opacity-0 z-30",
+                            focused && "visible opacity-100 top-12"
                         )}
                     >
                         {products.map(product => (
@@ -76,9 +79,10 @@ export const SearchInput: React.FC<Props> = ({ className }) => {
                                 href={`/catalog/product/${product.slug}`}
                                 onClick={onClickItem}
                             >
-                                <img
-                                    className="h-16 w-16"
-                                    src="https://msk.z-energo.com/upload/iblock/30d/vvodno_raspredelitel_noye-ustroystvo.jpg"
+                                <Image
+                                    width={75}
+                                    height={75}
+                                    src={image}
                                     alt={product.name}
                                 />
                                 <span className="rounded-sm h-8 w-full">

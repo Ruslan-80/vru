@@ -1,4 +1,5 @@
 "use client";
+import { useStoreCategory } from "@/store/store";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { Categoryes, SortPopup, Container } from "@/components/shared";
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const TopBar: React.FC<Props> = ({ className }) => {
+    const catalogData = useStoreCategory(state => state.catalogData);
     return (
         <div
             className={cn(
@@ -16,7 +18,7 @@ export const TopBar: React.FC<Props> = ({ className }) => {
             )}
         >
             <Container className="flex items-center justify-between">
-                <Categoryes />
+                <Categoryes catalogData={catalogData} />
                 <SortPopup />
             </Container>
         </div>

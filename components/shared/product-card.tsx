@@ -3,6 +3,10 @@ import React from "react";
 import { Button } from "../ui";
 import { Plus } from "lucide-react";
 
+interface Attribute {
+    name: string;
+    value: string | number | null;
+}
 interface Props {
     id: number;
     slug: string;
@@ -12,6 +16,7 @@ interface Props {
     manufacturingTime: string;
     basePrice: any;
     stock: number;
+    attributes: Attribute[];
     imageUrl: string;
     className?: string;
 }
@@ -24,6 +29,7 @@ export const ProductCard: React.FC<Props> = ({
     manufacturingTime,
     stock,
     basePrice,
+    attributes,
     imageUrl,
     className,
 }) => {
@@ -36,8 +42,16 @@ export const ProductCard: React.FC<Props> = ({
                         src={imageUrl}
                         alt={name}
                     />
+                    <p>{imageUrl}</p>
                     <h2 className="mb-3 mt-5 font-bold">{name}</h2>
                     <p className="text-sm text-gray-400">{description}</p>
+                    <ul>
+                        {attributes.map((attr, index) => (
+                            <li key={index}>
+                                {attr.name}: {attr.value}
+                            </li>
+                        ))}
+                    </ul>
                     <p className="text-sm text-gray-400">
                         В наличии {stock} шт.
                     </p>

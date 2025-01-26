@@ -12,7 +12,7 @@ interface Props {
     defaultItems?: Item[];
     limit?: number;
     searchInputPlaceholder?: string;
-    onChenge?: (values: string[]) => void;
+    onChange?: (values: string[]) => void;
     defaultValue?: string[];
     className?: string;
 }

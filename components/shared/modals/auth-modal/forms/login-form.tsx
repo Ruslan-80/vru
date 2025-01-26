@@ -4,9 +4,9 @@ import { formLoginSchema, TFormLoginValues } from "./schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui";
 
-interface Props {
-    onClose?: VoidFunction;
-}
+// interface Props {
+//     onClose?: VoidFunction;
+// }
 
 export const LoginForm: React.FC = () => {
     const form = useForm<TFormLoginValues>({

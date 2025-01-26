@@ -1,11 +1,13 @@
+import * as React from "react";
 import { Container, Filters, ProductCard, TopBar } from "@/components/shared";
 import { prisma } from "@/prisma/prisma-client";
 
-interface CatalogPageProps {
-    params: { slug: string };
-}
-export default async function CatalogPageId({ params }: CatalogPageProps) {
-    const { slug } = await params;
+type Params = { slug: string };
+export default async function CatalogPageId(props: {
+    params: Promise<Params>;
+}) {
+    const params = await props.params;
+    const slug = params.slug;
 
     const categories = await prisma.category.findUnique({
         where: { slug: String(slug) },
@@ -21,9 +23,40 @@ export default async function CatalogPageId({ params }: CatalogPageProps) {
         );
     }
 
-    const products = await prisma.product.findMany({
+    const productsData = await prisma.product.findMany({
         where: { categoryId: categories.id },
+        include: {
+            mediaFiles: true,
+            attributes: {
+                select: {
+                    attribute: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                    attributeValue: {
+                        select: {
+                            valueString: true,
+                            valueNumber: true,
+                        },
+                    },
+                },
+            },
+        },
     });
+
+    const products = productsData.map(product => ({
+        ...product,
+        attributes: product.attributes
+            .map(attr => ({
+                name: attr.attribute.name,
+                value:
+                    attr.attributeValue.valueString ??
+                    attr.attributeValue.valueNumber,
+            }))
+            .filter(attr => attr.value !== null), // Удаление атрибутов с null значением
+    }));
+    console.log(products);
 
     if (!products) {
         return;
@@ -66,7 +99,8 @@ export default async function CatalogPageId({ params }: CatalogPageProps) {
                                         }
                                         stock={product.stock}
                                         basePrice={product.basePrice}
-                                        imageUrl="https://msk.z-energo.com/upload/iblock/30d/vvodno_raspredelitel_noye-ustroystvo.jpg"
+                                        attributes={product.attributes}
+                                        imageUrl="/images/vru1.png"
                                     />
                                 ))}
                         </div>

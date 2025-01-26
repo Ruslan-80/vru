@@ -48,7 +48,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                             name={product.name}
                             basePrice={product.basePrice}
                             attributes={product.attributes}
-                            imageUrl="../../images/vru1.png"
+                            imageUrl="/images/vru1.png"
                         />
                     </div>
                 </div>

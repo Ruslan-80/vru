@@ -6,50 +6,36 @@ import {
     CheckboxFiltersGroup,
 } from "@/components/shared";
 import { Input } from "../ui/input";
-import { Category } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useStoreCategory } from "@/store/store";
 import { useFilterAttributes } from "@/hooks/useFilterAttributes";
-import axios from "axios";
+import { useEffect } from "react";
 
 interface Props {
     className?: string;
 }
 
 export const Filters: React.FC<Props> = ({ className }) => {
-    const [categories, setCategories] = useState<Category[]>([]);
+    const catalogData = useStoreCategory(state => state.catalogData);
+    const fetchCatalog = useStoreCategory(state => state.fetchCatalog);
     const { attributes } = useFilterAttributes();
+
+    useEffect(() => {
+        fetchCatalog();
+    }, [fetchCatalog]);
 
     const items = attributes.map(item => ({
         value: String(item.id),
         text: item.name,
     }));
-    console.log(attributes);
-
-    useEffect(() => {
-        fetchCategories();
-    }, []);
-
-    const fetchCategories = async () => {
-        try {
-            const response = await axios.get("/api/catalog");
-            const { category } = response.data;
-            setCategories(category);
-        } catch (error) {
-            console.error("Ошибка при получении категорий:", error);
-        }
-    };
 
     return (
         <div className={cn("", className)}>
             <h2 className="mb-5 font-bold">Фильтрация</h2>
             {/* Верхние чекбоксы */}
-            {categories.map(category => (
-                <FilterCheckbox
-                    key={category.id}
-                    text={category.name}
-                    value={String(category.id)}
-                />
-            ))}
+            {catalogData &&
+                catalogData.map(({ name, id }) => (
+                    <FilterCheckbox key={id} text={name} value={String(id)} />
+                ))}
             <div>
                 <FilterCheckbox text="Можно собирать" value="1" />
                 <FilterCheckbox text="Новинки" value="2" />

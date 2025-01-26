@@ -1,7 +1,12 @@
 import { Button, Dialog } from "@/components/ui";
 import { DialogContent } from "@/components/ui/dialog";
 import { signIn } from "next-auth/react";
+import Image from "next/image";
 import React from "react";
+
+const githubIcon = "https://github.githubassets.com/favicons/favicon.svg";
+const googlIcon =
+    "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg";
 
 interface Props {
     open: boolean;
@@ -9,11 +14,11 @@ interface Props {
 }
 
 export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
-    const hendleClose = () => {
+    const handleClose = () => {
         onClose();
     };
     return (
-        <Dialog open={open} onOpenChange={hendleClose}>
+        <Dialog open={open} onOpenChange={handleClose}>
             <DialogContent className="w-[450px] bg-white p-10">
                 FORM
                 <hr />
@@ -29,9 +34,11 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                         type="button"
                         className="gap-2 h-12 p-2 flex-1"
                     >
-                        <img
-                            className="w-6 h-6"
-                            src="https://github.githubassets.com/favicons/favicon.svg"
+                        <Image
+                            width={6}
+                            height={6}
+                            src={githubIcon}
+                            alt={"githubIcon"}
                         />
                         GitHub
                     </Button>
@@ -46,9 +53,11 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                         type="button"
                         className="gap-2 h-12 p-2 flex-1"
                     >
-                        <img
-                            className="w-6 h-6"
-                            src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"
+                        <Image
+                            width={6}
+                            height={6}
+                            src={googlIcon}
+                            alt="googlIcon"
                         />
                         Google
                     </Button>

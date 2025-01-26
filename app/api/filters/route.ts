@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const attributes = await prisma.attribute.findMany({
+        const filters = await prisma.attribute.findMany({
             include: {
                 values: {
                     distinct: ["valueString", "valueNumber"], // Уникальные значения
@@ -18,7 +18,7 @@ export async function GET() {
             orderBy: { name: "asc" },
         });
 
-        return NextResponse.json({ attributes });
+        return NextResponse.json({ filters });
     } catch (error) {
         return error;
     }

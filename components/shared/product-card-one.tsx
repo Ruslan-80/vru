@@ -53,7 +53,7 @@ export const ProductCardOne: React.FC<Props> = ({
                                     <h2 className="text-2xl font-bold tracking-tight max-w-[500px]">
                                         {name}
                                     </h2>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground bg-green-100 px-2 py-1">
                                         артикул: {article}
                                     </p>
                                 </div>
