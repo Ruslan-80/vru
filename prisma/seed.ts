@@ -1,137 +1,182 @@
-import { PrismaClient, UserRole, Prisma } from "@prisma/client";
-import { hashSync } from "bcrypt";
+import { PrismaClient, UserRole } from "@prisma/client";
+import { hashSync } from "bcryptjs";
+import slugify from "slugify";
 
 const prisma = new PrismaClient();
 
-async function up() {
-    // Создаем двух пользователей с разными ролями
-    const user1 = await prisma.user.create({
-        data: {
-            fullName: "Иван Иванов",
-            email: "ivan@example.com",
-            password: hashSync("password123", 10), // Хешируем пароль
-            role: UserRole.USER,
-            verified: new Date(),
-        },
-    });
+// Полный список таблиц в порядке удаления
+const tables = [
+    "CartItem",
+    "Cart",
+    "Order",
+    "ProductAttribute",
+    "AttributeValue",
+    "Attribute",
+    "ProductVariation",
+    "MediaFile",
+    "Product",
+    "Category",
+    "VerificationCode",
+    "User",
+];
 
-    const user2 = await prisma.user.create({
+async function resetDatabase() {
+    // Отключаем проверку внешних ключей
+    await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`;
+
+    // Удаляем данные и сбрасываем автоинкремент
+    for (const table of tables) {
+        await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`${table}\`;`);
+    }
+
+    // Включаем проверку внешних ключей
+    await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`;
+}
+
+async function main() {
+    // Полный сброс БД
+    await resetDatabase();
+
+    // Создаем администратора
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const admin = await prisma.user.create({
         data: {
-            fullName: "Админ Админов",
+            fullName: "Admin",
             email: "admin@example.com",
-            password: hashSync("adminpass123", 10), // Хешируем пароль
+            password: hashSync("admin123", 10),
             role: UserRole.ADMIN,
-            verified: new Date(),
         },
     });
 
-    console.log("Пользователи успешно добавлены:");
-    console.log({ user1, user2 });
-    // Создаем две категории
-    const category1 = await prisma.category.create({
-        data: {
-            name: "Вводно-распределительные устройства (ВРУ)",
-            slug: "vru",
-            description: "Категория для ВРУ",
-        },
-    });
+    // Создаем категории
+    const categories = await Promise.all(
+        ["ВРУ", "ЩАП"].map(name =>
+            prisma.category.create({
+                data: {
+                    name,
+                    slug: slugify(name, { lower: true, strict: true }),
+                    description: `${name} - описание категории`,
+                },
+            })
+        )
+    );
 
-    const category2 = await prisma.category.create({
-        data: {
-            name: "Щиты автоматического ввода резерва (АВР)",
-            slug: "avr",
-            description: "Категория для АВР",
+    // Данные для товаров
+    const productsData = [
+        {
+            name: "ВРУ1-11-10 УХЛ4",
+            category: "ВРУ",
+            article: "VRU1-11-10",
+            basePrice: 24500,
+            manufacturingTime: "5 дней",
+            stock: 8,
+            attributes: [
+                { name: "Напряжение", value: "380В" },
+                { name: "Ток", value: "100А" },
+                { name: "Защита", value: "IP54" },
+            ],
         },
-    });
-
-    // Создаем 4 товара, привязанных к категориям
-    const product1 = await prisma.product.create({
-        data: {
-            categoryId: category1.id,
-            article: "VRU-1-11-10",
-            name: "Вводно-распределительное устройство ВРУ-1-11-10",
-            slug: "vru-1-11-10",
-            description: "ВРУ для распределения электроэнергии",
-            basePrice: new Prisma.Decimal(109877),
+        {
+            name: "ВРУ1-12-20 УХЛ4",
+            category: "ВРУ",
+            article: "VRU1-12-20",
+            basePrice: 26500,
+            manufacturingTime: "7-10 дней",
+            stock: 3,
+            attributes: [
+                { name: "Напряжение", value: "380В" },
+                { name: "Ток", value: "250А" },
+                { name: "Защита", value: "IP31" },
+            ],
+        },
+        {
+            name: "ЩАП-43-31 УХЛ4 63А",
+            category: "ЩАП",
+            article: "SHAP-43-31",
+            basePrice: 41500,
             manufacturingTime: "10 дней",
             stock: 3,
-            visibility: true,
+            attributes: [
+                { name: "Напряжение", value: "380В" },
+                { name: "Ток", value: "63А" },
+                { name: "Защита", value: "IP65" },
+            ],
         },
-    });
-
-    const product2 = await prisma.product.create({
-        data: {
-            categoryId: category1.id,
-            article: "VRU-2-21-20",
-            name: "Вводно-распределительное устройство ВРУ-2-21-20",
-            slug: "vru-2-21-20",
-            description: "ВРУ с повышенной защитой",
-            basePrice: new Prisma.Decimal(125000),
-            manufacturingTime: "12 дней",
-            stock: 5,
-            visibility: true,
-        },
-    });
-
-    const product3 = await prisma.product.create({
-        data: {
-            categoryId: category2.id,
-            article: "AVR-1-AVR",
-            name: "Щит АВР 100А",
-            slug: "avr-1-avr",
-            description: "Щит автоматического ввода резерва 100А",
-            basePrice: new Prisma.Decimal(89000),
-            manufacturingTime: "7 дней",
-            stock: 2,
-            visibility: true,
-        },
-    });
-
-    const product4 = await prisma.product.create({
-        data: {
-            categoryId: category2.id,
-            article: "AVR-2-AVR",
-            name: "Щит АВР 250А",
-            slug: "avr-2-avr",
-            description: "Щит автоматического ввода резерва 250А",
-            basePrice: new Prisma.Decimal(150000),
-            manufacturingTime: "15 дней",
+        {
+            name: "ЩАП-12-31 УХЛ4 16А",
+            category: "ЩАП",
+            article: "SHAP-12-31",
+            basePrice: 17825,
+            manufacturingTime: "5 дней",
             stock: 4,
-            visibility: true,
+            attributes: [
+                { name: "Напряжение", value: "220В" },
+                { name: "Ток", value: "16А" },
+                { name: "Защита", value: "IP31" },
+            ],
         },
-    });
-    console.log("Категории и товары успешно добавлены!");
-    console.log({ product1, product2, product3, product4 });
-}
+    ];
 
-async function down() {
-    await prisma.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 0`);
+    // Создаем товары
+    for (const productData of productsData) {
+        const category = categories.find(c => c.name === productData.category)!;
 
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`VerificationCode\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`CartItem\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`Cart\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`Order\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`ProductAttribute\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`ProductVariation\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`AttributeValue\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`Attribute\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`MediaFile\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`Product\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`Category\``);
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`User\``);
+        const product = await prisma.product.create({
+            data: {
+                name: productData.name,
+                slug: slugify(productData.article, {
+                    lower: true,
+                    strict: true,
+                }),
+                article: productData.article,
+                categoryId: category.id,
+                basePrice: productData.basePrice,
+                manufacturingTime: productData.manufacturingTime,
+                stock: productData.stock,
+                visibility: true,
+            },
+        });
 
-    await prisma.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 1`);
+        // Создаем атрибуты
+        for (const attr of productData.attributes) {
+            const attributeSlug = slugify(attr.name, {
+                lower: true,
+                strict: true,
+            });
 
-    console.log("Все таблицы очищены!");
-}
-async function main() {
-    try {
-        await down();
-        await up();
-    } catch (error) {
-        console.error(error);
+            const attribute = await prisma.attribute.upsert({
+                where: { slug: attributeSlug },
+                update: {},
+                create: {
+                    name: attr.name,
+                    slug: attributeSlug,
+                },
+            });
+
+            const value = await prisma.attributeValue.create({
+                data: {
+                    attributeId: attribute.id,
+                    valueString: attr.value,
+                    valueNumber: null,
+                },
+            });
+
+            await prisma.productAttribute.create({
+                data: {
+                    productId: product.id,
+                    attributeId: attribute.id,
+                    attributeValueId: value.id,
+                },
+            });
+        }
     }
 }
-main().then(async () => {
-    await prisma.$disconnect();
-});
+
+main()
+    .catch(e => {
+        console.error("Seed error:", e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });

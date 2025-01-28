@@ -2,7 +2,7 @@ import { Api } from "@/services/api-client";
 import { Attribute } from "@prisma/client";
 import React from "react";
 
-type AttributeItem = Pick<Attribute, "id" | "name">;
+type AttributeItem = Pick<Attribute, "id" | "name" | "slug">;
 
 interface ReturnProps {
     attributes: AttributeItem[];
@@ -20,6 +20,7 @@ export const useFilterAttributes = (): ReturnProps => {
                     attributes.map(attribute => ({
                         id: attribute.id,
                         name: attribute.name,
+                        slug: attribute.slug,
                     }))
                 );
             } catch (error) {

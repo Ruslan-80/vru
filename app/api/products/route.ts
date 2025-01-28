@@ -1,27 +1,51 @@
-import { prisma } from "@/prisma/prisma-client";
 import { NextResponse } from "next/server";
+import { prisma } from "@/prisma/prisma-client";
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+
+    const filters = searchParams.getAll("filters");
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+
     const products = await prisma.product.findMany({
+        where:
+            filters.length > 0
+                ? {
+                      AND: [
+                          {
+                              attributes: {
+                                  some: {
+                                      attributeValue: {
+                                          OR: [
+                                              { valueString: { in: filters } },
+                                              {
+                                                  valueNumber: {
+                                                      in: filters.map(Number),
+                                                  },
+                                              },
+                                          ],
+                                      },
+                                  },
+                              },
+                          },
+                          {
+                              basePrice: {
+                                  gte: Number(minPrice) || 0,
+                                  lte: Number(maxPrice) || 10000,
+                              },
+                          },
+                      ],
+                  }
+                : {},
         include: {
-            mediaFiles: true,
-
             attributes: {
                 include: {
-                    attribute: true,
-                    attributeValue: true,
+                    attributeValue: true, // Включаем связанную модель
                 },
             },
         },
-        take: 10,
     });
 
-    return NextResponse.json({ products }, { status: 200 });
+    return NextResponse.json({ products });
 }
-
-// export async function POST(req: NextRequest) {
-//     const data = await req.json();
-
-//     const user = await prisma.user.create({ data });
-//     return NextResponse.json({ user }, { status: 201 });
-// }

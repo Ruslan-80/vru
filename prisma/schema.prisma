@@ -23,6 +23,8 @@ model User {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([email, role])
 }
 
 model Cart {
@@ -41,7 +43,7 @@ model CartItem {
     id            Int              @id @default(autoincrement())
     productItem   ProductVariation @relation(fields: [productItemId], references: [id])
     productItemId Int
-    quantity      Int
+    quantity      Int              @default(1)
     cart          Cart             @relation(fields: [cartId], references: [id])
     cartId        Int
 
@@ -50,22 +52,25 @@ model CartItem {
 }
 
 model Order {
-    id          Int         @id @default(autoincrement())
-    token       String
-    totalAmount Int
-    status      OrderStatus
-    paymentId   String?
-    items       Json
-    fullName    String
-    address     String
-    email       String
-    phone       String
-    comment     String?
-    user        User?       @relation(fields: [userId], references: [id])
-    userId      Int?
+    id           Int         @id @default(autoincrement())
+    token        String      @unique
+    totalAmount  Int
+    status       OrderStatus @default(PENDING)
+    paymentId    String?
+    items        Json
+    customerInfo Json
+    fullName     String
+    address      String
+    email        String
+    phone        String
+    comment      String?
+    user         User?       @relation(fields: [userId], references: [id])
+    userId       Int?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([userId, status])
 }
 
 model VerificationCode {
@@ -78,29 +83,21 @@ model VerificationCode {
     @@unique([userId, code])
 }
 
-enum OrderStatus {
-    PENDING
-    SUCCEEDED
-    CANCELLED
-}
-
-enum UserRole {
-    USER
-    ADMIN
-}
-
 model Category {
-    id          Int        @id @default(autoincrement())
+    id          Int           @id @default(autoincrement())
     parentId    Int?
     name        String
-    slug        String     @unique
+    slug        String        @unique
     description String?
-    children    Category[] @relation("CategoryToParent")
-    parent      Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+    children    Category[]    @relation("CategoryToParent")
+    parent      Category?     @relation("CategoryToParent", fields: [parentId], references: [id])
     products    Product[]
+    tags        CategoryTag[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([parentId, slug])
 }
 
 model Product {
@@ -110,7 +107,7 @@ model Product {
     name              String
     slug              String             @unique
     description       String?
-    basePrice         Decimal            @db.Decimal(10, 2)
+    basePrice         Int
     manufacturingTime String
     stock             Int
     visibility        Boolean            @default(true)
@@ -118,9 +115,13 @@ model Product {
     variations        ProductVariation[]
     attributes        ProductAttribute[]
     mediaFiles        MediaFile[]
+    tags              ProductTag[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([categoryId, slug])
+    @@fulltext([name, description, article])
 }
 
 model ProductVariation {
@@ -128,7 +129,7 @@ model ProductVariation {
     productId      Int
     sku            String  @unique
     variationValue String
-    price          Decimal @db.Decimal(10, 2)
+    price          Int
     stock          Int
     isDefault      Boolean @default(false)
 
@@ -137,6 +138,40 @@ model ProductVariation {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([productId, sku])
+}
+
+model Tag {
+    id         Int           @id @default(autoincrement())
+    name       String        @unique
+    slug       String        @unique
+    products   ProductTag[]
+    categories CategoryTag[]
+    createdAt  DateTime      @default(now())
+    updatedAt  DateTime      @updatedAt
+
+    @@index([name, slug])
+}
+
+model ProductTag {
+    id        Int     @id @default(autoincrement())
+    productId Int
+    tagId     Int
+    product   Product @relation(fields: [productId], references: [id])
+    tag       Tag     @relation(fields: [tagId], references: [id])
+
+    @@unique([productId, tagId])
+}
+
+model CategoryTag {
+    id         Int      @id @default(autoincrement())
+    categoryId Int
+    tagId      Int
+    category   Category @relation(fields: [categoryId], references: [id])
+    tag        Tag      @relation(fields: [tagId], references: [id])
+
+    @@unique([categoryId, tagId])
 }
 
 model Attribute {
@@ -148,19 +183,23 @@ model Attribute {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([slug])
 }
 
 model AttributeValue {
-    id          Int     @id @default(autoincrement())
+    id          Int    @id @default(autoincrement())
     attributeId Int
-    valueString String?
-    valueNumber Float?
+    valueString String
+    valueNumber Int?
 
-    attribute        Attribute          @relation(fields: [attributeId], references: [id])
-    productAttribute ProductAttribute[]
+    products  ProductAttribute[]
+    attribute Attribute          @relation(fields: [attributeId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([attributeId, valueString])
 }
 
 model ProductAttribute {
@@ -174,15 +213,37 @@ model ProductAttribute {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@unique([productId, attributeId, attributeValueId])
 }
 
 model MediaFile {
-    id        Int     @id @default(autoincrement())
+    id        Int      @id @default(autoincrement())
     productId Int
-    fileType  String
-    fileUrl   String
-    product   Product @relation(fields: [productId], references: [id])
+    type      FileType
+    url       String
+    product   Product  @relation(fields: [productId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([productId, type])
+}
+
+enum FileType {
+    IMAGE
+    VIDEO
+    DOCUMENT
+}
+
+enum OrderStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    CANCELLED
+}
+
+enum UserRole {
+    USER
+    ADMIN
 }
