@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Input } from "../ui";
+import { Input, Skeleton } from "../ui";
 import { FilterCheckbox } from "@/components/shared";
 import { FilterCheckboxProps } from "./filter-checkbox";
 
@@ -11,8 +11,10 @@ interface Props {
     items: Item[];
     defaultItems?: Item[];
     limit?: number;
+    loading?: boolean;
     searchInputPlaceholder?: string;
-    onChange?: (values: string[]) => void;
+    selectedValues?: Set<string>;
+    onClickCheckbox?: (value: string) => void;
     defaultValue?: string[];
     className?: string;
 }
@@ -24,19 +26,36 @@ export const CheckboxFiltersGroup: React.FC<Props> = ({
     limit = 5,
     searchInputPlaceholder = "Поиск...",
     className,
-    // onChange,
-    // defaultValue,
+    loading,
+    selectedValues,
+    onClickCheckbox,
 }) => {
     const [showAll, setShowAll] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState("");
     const onChangeSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchValue(e.target.value);
     };
+
+    if (loading) {
+        return (
+            <div className={className}>
+                <p className="mb-3 font-bold">{title}</p>
+                {...Array(limit)
+                    .fill(0)
+                    .map((_, index) => (
+                        <Skeleton
+                            key={index}
+                            className="h-6 w-full mb-4 rounded-[8px]"
+                        />
+                    ))}
+            </div>
+        );
+    }
     const list = showAll
         ? items.filter(item =>
-              item.text.toLowerCase().includes(searchValue.toLowerCase())
+              item.name.toLowerCase().includes(searchValue.toLowerCase())
           )
-        : defaultItems?.slice(0, limit);
+        : (defaultItems || items).slice(0, limit);
     return (
         <div className={className}>
             <p className="mb-3 font-bold">{title}</p>
@@ -53,11 +72,13 @@ export const CheckboxFiltersGroup: React.FC<Props> = ({
                 {list.map((item, index) => (
                     <FilterCheckbox
                         key={index}
-                        text={item.text}
+                        name={item.name}
+                        values={item.values}
                         value={item.value}
+                        selectedValues={selectedValues}
                         endAdornment={item.endAdornment}
-                        checked={false}
-                        onCheckedChange={ids => console.log(ids)}
+                        checked={true}
+                        onClickCheckbox={id => onClickCheckbox?.(id)}
                     />
                 ))}
             </div>
