@@ -5,8 +5,10 @@ import { useIntersection } from "react-use";
 import { ProductCard } from "./product-card";
 import { useCategoryStore } from "@/store/category";
 
+
+
 interface Props {
-    key: number;
+    key?: number;
     title: string;
     items: any[];
     categoryId: number;
@@ -32,6 +34,7 @@ export const ProductsGroupList: React.FC<Props> = ({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [categoryId, Intersection?.isIntersecting, title]);
+
     return (
         <div className={className} id={title} ref={IntersectionRef}>
             <h2 className="font-extrabold mb-5">{title}</h2>

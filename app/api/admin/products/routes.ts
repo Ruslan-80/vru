@@ -14,8 +14,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        console.log("Products received:", JSON.stringify(products, null, 2));
-
         const createProductsData = products.map((product: any) => {
             const variations = Array.isArray(product.variations)
                 ? product.variations

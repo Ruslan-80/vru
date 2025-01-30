@@ -9,7 +9,6 @@ function createSlug(text: string) {
         lowercase: true,
         separator: "-",
     });
-    console.log("Slug:", slug);
 
     return slug;
 }

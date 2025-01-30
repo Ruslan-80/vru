@@ -21,7 +21,6 @@ export default async function CatalogPage() {
         },
         orderBy: { slug: "asc" },
     });
-    console.log(filters);
 
     return (
         <Container>

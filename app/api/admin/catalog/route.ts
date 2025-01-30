@@ -20,8 +20,6 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-    console.log(req.text);
-
     try {
         const { name, parentId, slug, description } = await req.json();
 

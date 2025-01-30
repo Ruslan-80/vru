@@ -161,7 +161,6 @@ export default function ProductsAdmin() {
         setIsEditing(true);
         setIsFormVisible(true);
     };
-    console.log(productAttributes);
 
     return (
         <Container className="container">

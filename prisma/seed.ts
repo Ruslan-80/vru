@@ -50,7 +50,12 @@ async function main() {
 
     // Создаем категории
     const categories = await Promise.all(
-        ["ВРУ", "ЩАП"].map(name =>
+        [
+            "Вводно-распределительные устройства ВРУ",
+            "Щиты автоматического резерва ЩАП",
+            "Главные распределительные щиты ГРЩ",
+            "Ящики управления РУСМ5000",
+        ].map(name =>
             prisma.category.create({
                 data: {
                     name,
@@ -65,7 +70,7 @@ async function main() {
     const productsData = [
         {
             name: "ВРУ1-11-10 УХЛ4",
-            category: "ВРУ",
+            category: "Вводно-распределительные устройства ВРУ",
             article: "VRU1-11-10",
             basePrice: 24500,
             manufacturingTime: "5 дней",
@@ -78,7 +83,7 @@ async function main() {
         },
         {
             name: "ВРУ1-12-20 УХЛ4",
-            category: "ВРУ",
+            category: "Вводно-распределительные устройства ВРУ",
             article: "VRU1-12-20",
             basePrice: 26500,
             manufacturingTime: "7-10 дней",
@@ -91,7 +96,7 @@ async function main() {
         },
         {
             name: "ЩАП-43-31 УХЛ4 63А",
-            category: "ЩАП",
+            category: "Щиты автоматического резерва ЩАП",
             article: "SHAP-43-31",
             basePrice: 41500,
             manufacturingTime: "10 дней",
@@ -104,13 +109,39 @@ async function main() {
         },
         {
             name: "ЩАП-12-31 УХЛ4 16А",
-            category: "ЩАП",
+            category: "Щиты автоматического резерва ЩАП",
             article: "SHAP-12-31",
             basePrice: 17825,
             manufacturingTime: "5 дней",
             stock: 4,
             attributes: [
                 { name: "Напряжение", value: "220В" },
+                { name: "Ток", value: "16А" },
+                { name: "Защита", value: "IP31" },
+            ],
+        },
+        {
+            name: "Я5110-1874 УХЛ4 ящик управления электродвигателем",
+            category: "Ящики управления РУСМ5000",
+            article: "Я51110-1874 УХЛ4",
+            basePrice: 10316,
+            manufacturingTime: "5 дней",
+            stock: 4,
+            attributes: [
+                { name: "Напряжение", value: "380В" },
+                { name: "Ток", value: "0,6А" },
+                { name: "Защита", value: "IP31" },
+            ],
+        },
+        {
+            name: "Я5110-3274 УХЛ4 ящик управления электродвигателем",
+            category: "Ящики управления РУСМ5000",
+            article: "Я5110-3274 УХЛ4",
+            basePrice: 10883,
+            manufacturingTime: "5 дней",
+            stock: 4,
+            attributes: [
+                { name: "Напряжение", value: "380В" },
                 { name: "Ток", value: "16А" },
                 { name: "Защита", value: "IP31" },
             ],

@@ -13,7 +13,6 @@ export async function GET() {
             }
         );
         const items = response.data.items;
-        console.log(items[0]);
 
         const filteredProducts = items.map((item: any) => ({
             id: item.article,

@@ -1,24 +1,13 @@
-"use client";
-import { useStoreCategory, useStoreProduct } from "@/store/store";
-import {
-    TopBar,
-    Container,
-    ProductsGroupList,
-    Filters,
-} from "@/components/shared";
+import { TopBar, Container, ProductsGroupList } from "@/components/shared";
+import { Filters } from "@/components/shared/filters";
+import { findProduct, GetSerchParams } from "@/lib/find-products";
 
-import { useEffect } from "react";
-
-export default function Home() {
-    const catalogData = useStoreCategory(state => state.catalogData);
-    const fetchCatalog = useStoreCategory(state => state.fetchCatalog);
-    const productData = useStoreProduct(state => state.productData);
-    const fetchProduct = useStoreProduct(state => state.fetchProduct);
-
-    useEffect(() => {
-        fetchCatalog();
-        fetchProduct();
-    }, [fetchCatalog, fetchProduct]);
+export default async function Home({
+    searchParams,
+}: {
+    searchParams: GetSerchParams;
+}) {
+    const { categories } = await findProduct(searchParams);
 
     return (
         <>
@@ -42,23 +31,17 @@ export default function Home() {
                     </div>
                     <div className="flex-1">
                         <div className="flex flex-col gap-16">
-                            {catalogData ? (
-                                catalogData.map(category => (
+                            {categories.map(category =>
+                                category.products.length > 0 ? (
                                     <ProductsGroupList
                                         key={category.id}
                                         title={category.name}
-                                        items={
-                                            productData?.filter(
-                                                product =>
-                                                    product.categoryId ===
-                                                    category.id
-                                            ) || []
-                                        }
                                         categoryId={category.id}
+                                        items={category.products}
                                     />
-                                ))
-                            ) : (
-                                <p>Загрузка категорий...</p>
+                                ) : (
+                                    <p>Загрузка категорий...</p>
+                                )
                             )}
                         </div>
                     </div>
